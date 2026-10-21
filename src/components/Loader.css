@@ -1,0 +1,713 @@
+/* ================================================================== */
+/*  ATUL DESIGN – Loader                                               */
+/*  Self-contained (no Tailwind dependency, all classes prefixed kl-)  */
+/*  Everything animated here uses transform / opacity only (GPU).      */
+/* ================================================================== */
+
+.kl-wrap {
+    --kl-o: #ff4d00;
+    --kl-o2: #ff7a1a;
+    --kl-gold: #ffc04d;
+    --kl-bg: #030303;
+    --kl-dim: rgba(255, 255, 255, 0.5);
+    --kl-display: 'Bebas Neue', 'Oswald', 'Anton', Impact, 'Arial Narrow', sans-serif;
+    --kl-label: 'Oswald', 'Bebas Neue', 'Arial Narrow', sans-serif;
+
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    overflow: hidden;
+    color: #fff;
+    font-family: var(--kl-label);
+}
+
+.kl-phase-reveal {
+    pointer-events: none;
+}
+
+/* ---------- Shutter strips (the solid background + the exit) ---------- */
+.kl-strips {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    overflow: hidden;
+}
+
+.kl-strips i {
+    position: relative;
+    display: block;
+    width: calc(100% + 1px);
+    /* 1px overlap hides hairline seams */
+    height: 100%;
+    background: linear-gradient(to bottom, var(--kl-bg) 0%, #050202 60%, #1c0802 100%);
+    will-change: transform;
+    transition: transform 0.95s cubic-bezier(0.77, 0, 0.18, 1) calc(var(--d) + 0.15s);
+}
+
+.kl-strips i::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ff7a1a, transparent);
+    box-shadow: 0 0 22px 4px rgba(255, 90, 0, 0.75);
+    opacity: 0;
+    transition: opacity 0.2s ease calc(var(--d) + 0.15s);
+}
+
+.kl-phase-reveal .kl-strips i {
+    transform: translate3d(0, -114%, 0);
+}
+
+.kl-phase-reveal .kl-strips i::after {
+    opacity: 1;
+}
+
+/* ---------- Stage (all content, fades out on reveal) ---------- */
+.kl-stage {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+}
+
+.kl-phase-reveal .kl-stage {
+    animation: kl-stage-out 0.55s ease forwards;
+}
+
+.kl-bg {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1.6px);
+    background-size: 38px 38px;
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 0%, transparent 70%);
+    mask-image: radial-gradient(ellipse at center, #000 0%, transparent 70%);
+}
+
+.kl-glow {
+    position: absolute;
+    left: 50%;
+    top: 44%;
+    width: min(110vmin, 1100px);
+    height: min(110vmin, 1100px);
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255, 70, 0, 0.3) 0%, rgba(255, 70, 0, 0.08) 40%, transparent 68%);
+    animation: kl-glow-pulse 3.2s ease-in-out infinite;
+    will-change: transform;
+}
+
+.kl-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.kl-grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.06;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+.kl-flash {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 44%, rgba(255, 220, 160, 0.85), rgba(255, 90, 0, 0.35) 30%, transparent 62%);
+}
+
+.kl-phase-ready .kl-flash {
+    animation: kl-flash 0.8s ease-out forwards;
+}
+
+/* ---------- HUD ---------- */
+.kl-logo {
+    position: absolute;
+    top: clamp(16px, 2.6vw, 32px);
+    left: clamp(16px, 2.6vw, 32px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.kl-logo__box {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--kl-o);
+    border-radius: 3px;
+    font-family: var(--kl-display);
+    font-size: 22px;
+    line-height: 1;
+    color: var(--kl-o);
+    box-shadow: 0 0 12px rgba(255, 77, 0, 0.35);
+}
+
+.kl-logo__text {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--kl-label);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: 0.04em;
+}
+
+.kl-logo__text b {
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--kl-o);
+}
+
+.kl-hud {
+    position: absolute;
+    font-family: var(--kl-label);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    color: var(--kl-dim);
+    white-space: nowrap;
+}
+
+.kl-hud--bl {
+    left: clamp(16px, 2.6vw, 32px);
+    bottom: clamp(16px, 2.6vw, 32px);
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+}
+
+.kl-hud--br {
+    right: clamp(16px, 2.6vw, 32px);
+    bottom: clamp(16px, 2.6vw, 32px);
+    text-align: right;
+    line-height: 1.5;
+}
+
+.kl-hud--side {
+    right: clamp(10px, 1.6vw, 22px);
+    top: 50%;
+    transform: translateY(-50%) rotate(180deg);
+    writing-mode: vertical-rl;
+}
+
+/* ---------- Core ---------- */
+.kl-core {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 24px;
+    text-align: center;
+}
+
+.kl-slot {
+    --em: clamp(210px, 36vmin, 350px);
+    position: relative;
+    width: var(--em);
+    height: var(--em);
+    perspective: 900px;
+}
+
+.kl-emblem {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    will-change: transform;
+    animation: kl-emblem-in 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Fiery halo behind the ring */
+.kl-corona {
+    position: absolute;
+    inset: -22%;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+            transparent 50%,
+            rgba(255, 90, 0, 0.55) 60%,
+            rgba(255, 50, 0, 0.18) 70%,
+            transparent 80%);
+    animation: kl-glow-pulse 2.6s ease-in-out infinite;
+}
+
+/* Rotating flame shimmer along the ring */
+.kl-flare {
+    position: absolute;
+    inset: 6.5%;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 0 25%, rgba(255, 140, 30, 0.95) 48%, transparent 70% 100%);
+    -webkit-mask: radial-gradient(farthest-side,
+            transparent calc(100% - 12px),
+            #000 calc(100% - 6px),
+            #000 calc(100% - 1px),
+            transparent 100%);
+    mask: radial-gradient(farthest-side,
+            transparent calc(100% - 12px),
+            #000 calc(100% - 6px),
+            #000 calc(100% - 1px),
+            transparent 100%);
+    opacity: 0.85;
+    animation: kl-spin-el 2.8s linear infinite;
+}
+
+.kl-disc {
+    position: absolute;
+    inset: 8.5%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, #080302 55%, #120502 100%);
+    box-shadow: inset 0 0 50px rgba(255, 70, 0, 0.28);
+}
+
+.kl-rings {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.kl-ring {
+    fill: none;
+}
+
+.kl-ring--ticks {
+    stroke: rgba(255, 150, 60, 0.4);
+    stroke-width: 4;
+    stroke-dasharray: 1 8;
+}
+
+.kl-spin {
+    transform-origin: 150px 150px;
+    animation: kl-spin-el 45s linear infinite reverse;
+}
+
+.kl-spin-text {
+    transform-origin: 150px 150px;
+    animation: kl-spin-el 50s linear infinite;
+}
+
+.kl-ringtext {
+    font-family: var(--kl-label);
+    font-size: 9.5px;
+    font-weight: 500;
+    fill: rgba(255, 170, 100, 0.6);
+}
+
+.kl-track {
+    fill: none;
+    stroke: rgba(255, 110, 30, 0.2);
+    stroke-width: 3;
+    stroke-dasharray: 100 100;
+    animation: kl-track-draw 1.1s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.kl-arc {
+    fill: none;
+    stroke: url(#kl-grad);
+    stroke-width: 4;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 7px rgba(255, 90, 0, 0.95)) drop-shadow(0 0 16px rgba(255, 70, 0, 0.7));
+}
+
+.kl-headg {
+    transform-origin: 150px 150px;
+}
+
+.kl-head {
+    fill: #fff;
+    filter: drop-shadow(0 0 6px #ffb347) drop-shadow(0 0 14px #ff5a00);
+}
+
+.kl-phase-ready .kl-arc {
+    stroke: #fff2d1;
+}
+
+/* Boxed "A" logo mark in the middle */
+.kl-mark {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+}
+
+.kl-mark span {
+    display: grid;
+    place-items: center;
+    width: calc(var(--em) * 0.28);
+    height: calc(var(--em) * 0.28);
+    border: 2px solid var(--kl-o);
+    border-radius: 6px;
+    font-family: var(--kl-display);
+    font-size: calc(var(--em) * 0.2);
+    line-height: 1;
+    color: var(--kl-o);
+    text-shadow: 0 0 18px rgba(255, 77, 0, 0.9);
+    box-shadow: 0 0 22px rgba(255, 77, 0, 0.45), inset 0 0 18px rgba(255, 77, 0, 0.2);
+    animation: kl-mark-pulse 2.2s ease-in-out infinite;
+}
+
+/* Floating debris shards (like the rocks in the hero) */
+.kl-shards {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+}
+
+.kl-shards span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--sz);
+    height: var(--sz);
+    margin: calc(var(--sz) / -2);
+    background: linear-gradient(135deg, #240a02 0%, #ff5a00 120%);
+    clip-path: polygon(50% 0, 100% 38%, 82% 100%, 12% 82%, 0 28%);
+    transform: rotate(var(--a)) translateX(calc(var(--em) * var(--k))) rotate(var(--rot));
+    animation: kl-shard var(--dur) ease-in-out var(--delay) infinite alternate;
+}
+
+/* Shockwave rings at 100% */
+.kl-shock {
+    position: absolute;
+    inset: 6.5%;
+    border-radius: 50%;
+    border: 2px solid #ffd7a0;
+    box-shadow: 0 0 24px 4px rgba(255, 100, 0, 0.8), inset 0 0 24px 2px rgba(255, 100, 0, 0.5);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.kl-phase-ready .kl-shock,
+.kl-phase-reveal .kl-shock {
+    animation: kl-shock 1.1s cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
+}
+
+.kl-phase-ready .kl-shock--2,
+.kl-phase-reveal .kl-shock--2 {
+    animation-delay: 0.18s;
+}
+
+/* Floating tags */
+.kl-chip {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 14px 8px 10px;
+    border: 1px solid rgba(255, 90, 20, 0.55);
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(40, 12, 4, 0.9), rgba(12, 4, 2, 0.92));
+    box-shadow: 0 0 18px rgba(255, 77, 0, 0.25);
+    text-align: left;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate3d(0, 12px, 40px) scale(0.9);
+    transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.2, 0.9, 0.2, 1.2);
+}
+
+.kl-chip.is-on {
+    opacity: 1;
+    transform: translate3d(0, 0, 40px) scale(1);
+}
+
+.kl-chip i {
+    font-style: normal;
+    font-family: var(--kl-label);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--kl-o);
+    text-shadow: 0 0 10px rgba(255, 77, 0, 0.8);
+}
+
+.kl-chip span {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+}
+
+.kl-chip b {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.kl-chip small {
+    font-size: 9.5px;
+    color: var(--kl-dim);
+    letter-spacing: 0.04em;
+}
+
+.kl-chip--tl {
+    right: 90%;
+    top: 8%;
+}
+
+.kl-chip--tr {
+    left: 88%;
+    top: -2%;
+}
+
+.kl-chip--br {
+    left: 92%;
+    bottom: 14%;
+}
+
+/* ---------- Sliding headline ---------- */
+.kl-headline {
+    margin: clamp(22px, 4vmin, 38px) 0 0;
+    height: 1.15em;
+    overflow: hidden;
+    font-family: var(--kl-display);
+    font-size: clamp(34px, 7.4vmin, 68px);
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    color: #fff;
+}
+
+.kl-headline .kl-track {
+    display: block;
+    will-change: transform;
+    transition: transform 0.8s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+.kl-line {
+    display: block;
+    height: 1.15em;
+    line-height: 1.15em;
+    white-space: nowrap;
+}
+
+.kl-line em {
+    font-style: normal;
+    color: var(--kl-o);
+    text-shadow: 0 0 18px rgba(255, 77, 0, 0.55);
+}
+
+/* ---------- Progress ---------- */
+.kl-meter {
+    width: min(420px, 78vw);
+    margin-top: clamp(14px, 2.6vmin, 24px);
+}
+
+.kl-bar {
+    position: relative;
+    height: 3px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.kl-bar__fill {
+    position: absolute;
+    inset: 0;
+    border-radius: 3px;
+    transform: scaleX(0);
+    transform-origin: left center;
+    background: linear-gradient(90deg, #ff2d00, var(--kl-o2), var(--kl-gold));
+    box-shadow: 0 0 14px 1px rgba(255, 90, 0, 0.8);
+    will-change: transform;
+}
+
+.kl-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 10px;
+}
+
+.kl-label {
+    padding-bottom: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    color: var(--kl-dim);
+}
+
+.kl-phase-ready .kl-label {
+    color: var(--kl-o);
+    text-shadow: 0 0 10px rgba(255, 77, 0, 0.8);
+}
+
+/* Odometer counter */
+.kl-count {
+    display: inline-flex;
+    align-items: flex-end;
+    font-family: var(--kl-display);
+    font-size: clamp(34px, 6.4vmin, 56px);
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 0 16px rgba(255, 77, 0, 0.55);
+}
+
+.kl-digit {
+    display: inline-block;
+    width: 0.46em;
+    height: 1em;
+    overflow: hidden;
+    text-align: center;
+    line-height: 1;
+}
+
+.kl-strip {
+    display: block;
+    will-change: transform;
+}
+
+.kl-strip i {
+    display: block;
+    height: 1em;
+    line-height: 1em;
+    font-style: normal;
+}
+
+.kl-count small {
+    margin: 0 0 0.12em 4px;
+    font-size: 0.42em;
+    line-height: 1;
+    color: var(--kl-o);
+}
+
+.kl-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.85) 100%);
+    pointer-events: none;
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes kl-stage-out {
+    to {
+        opacity: 0;
+        transform: scale(1.06);
+    }
+}
+
+@keyframes kl-emblem-in {
+    from {
+        opacity: 0;
+        scale: 0.82;
+    }
+
+    to {
+        opacity: 1;
+        scale: 1;
+    }
+}
+
+@keyframes kl-track-draw {
+    from {
+        stroke-dashoffset: 100;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes kl-spin-el {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes kl-glow-pulse {
+
+    0%,
+    100% {
+        opacity: 0.72;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes kl-mark-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 22px rgba(255, 77, 0, 0.45), inset 0 0 18px rgba(255, 77, 0, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 38px rgba(255, 77, 0, 0.8), inset 0 0 26px rgba(255, 77, 0, 0.35);
+    }
+}
+
+@keyframes kl-shard {
+    to {
+        transform: rotate(calc(var(--a) + 14deg)) translateX(calc(var(--em) * var(--k) + 14px)) rotate(calc(var(--rot) + 70deg));
+    }
+}
+
+@keyframes kl-shock {
+    0% {
+        opacity: 0.95;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(5.5);
+    }
+}
+
+@keyframes kl-flash {
+    0% {
+        opacity: 0;
+    }
+
+    25% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 760px) {
+    .kl-chip {
+        display: none;
+    }
+
+    .kl-hud--side {
+        display: none;
+    }
+
+    .kl-hud--br {
+        display: none;
+    }
+
+    .kl-hud--bl {
+        font-size: 9px;
+    }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+
+    .kl-flare,
+    .kl-spin,
+    .kl-spin-text,
+    .kl-glow,
+    .kl-corona,
+    .kl-mark span,
+    .kl-shards span {
+        animation: none;
+    }
+
+    .kl-canvas {
+        display: none;
+    }
+}
